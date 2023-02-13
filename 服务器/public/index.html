@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1584, initial-scale=0.1">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>吾爱破解 2023 年解题领红包活动</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            overflow: hidden;
+        }
+
+        .terminal {
+            color: #fff;
+            background-color: #000;
+            font-family: "Courier New", NSimSun, monospace;
+            line-height: 1;
+            overflow: hidden;
+        }
+
+        .terminal a {
+            font-style: italic;
+            color: white;
+        }
+
+        #terminal {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #terminal-text {
+            white-space: pre;
+        }
+
+        #tips {
+            position: absolute;
+            left: 0;
+            top: 3em;
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="touch-to-start" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; text-align: center; line-height: 90vh">点击屏幕开始...</div>
+    <audio src="bgm.mp3" loop="loop" style="display: none"></audio>
+    <div id="terminal" class="terminal" style="display: none">
+        <div id="terminal-text"></div>
+        <div id="tips" style="display: none; text-align:center">
+            <p>吾爱破解 2023 年解题领红包活动</p>
+            <div style="margin-top: 3em; display: inline-block; text-align: left">
+                <p>恭喜你，你找对地方了！</p>
+                <p style="margin-top: 1em">请 <a href="/login">登录</a> 以获取 flag。</p>
+                <p style="margin-top: 1em">找到 flag 之后请按活动说明进行提交 <a href="https://www.52pojie.cn/thread-1738015-1-1.html">https://www.52pojie.cn/thread-1738015-1-1.html</a></p>
+                <p style="margin-top: 1em">请注意：flag 可不止一个哦~</p>
+                <!-- 提示：你可以去 DNS 中寻找一些信息 -->
+            </div>
+        </div>
+    </div>
+    <script>
+        const FLAG_LINE_A = '|01 1 001 1 001 1 01 1 0001 1 00001 01 1 001 1 1 001 1 0111 011 1 101100 1 1 0 10 1 011 0 01 0000 1 10000 001 1 01 1 0 011 0 00 10 011 0 010 100 1 1011 000 1 1 0 0 11 01111101==========|'; // 这里面藏着两个 flag 哦~
+        const FLAG_LINE_B = '|++++++++++[>++++++++++>++++++++++>+++++>++++++++++++<<<<-]>++.++++++.>---.<-----.>>-..>+++.<+++++.---.+.---.+++++++.<+++.+.>-.>++.|';
+        const FLAG_LINE_A2 = FLAG_LINE_A.replaceAll(' ', '');
+        const FLAG_LINE_A_PARTS = Array.from(FLAG_LINE_A.matchAll(/. ?/g)).map(x => x[0]);
+
+        // 注意：以下代码与 flag 无关
+
+        const BORDER_LINE = '||                                                                                                                                ||';
+
+        function measureFontWidthRatio(el) {
+            const div = document.createElement('div');
+            div.style.position = 'absolute';
+            div.style.visibility = 'none';
+            div.style.fontSize = '100px';
+            div.style.lineHeight = '1';
+            div.textContent = 'A';
+            el.appendChild(div);
+            const ratio = div.clientWidth / div.clientHeight;
+            div.remove();
+            return ratio;
+        }
+
+        const touchToStartEl = document.querySelector('#touch-to-start');
+        const audioEl = document.querySelector('audio');
+        const terminalEl = document.querySelector('#terminal');
+        const tipsEl = document.querySelector('#tips');
+        const terminalTextEl = document.querySelector('#terminal-text');
+
+        const start = () => {
+            terminalEl.style.display = '';
+            terminalEl.requestFullscreen();
+
+            // region Terminal 动画
+            let fontWidth;
+            let fontHeight;
+            let terminalLines;
+            let stage = 0;
+            let n = 0;
+            let timerId;
+            const calcFrame = () => {
+                if (stage === 0) {
+                    n++;
+                    if (n > FLAG_LINE_A_PARTS.length) {
+                        stage++;
+                        n = 0;
+                    } else {
+                        terminalTextEl.textContent = FLAG_LINE_A_PARTS.slice(0, n).join('');
+                        if (terminalTextEl.textContent.length > BORDER_LINE.length) {
+                            stage++;
+                            n = 0;
+                        }
+                        return;
+                    }
+                }
+                if (stage === 1) {
+                    n++;
+                    if (n > FLAG_LINE_A_PARTS.length) {
+                        stage++;
+                        n = 0;
+                    } else {
+                        n++
+                        terminalTextEl.textContent = FLAG_LINE_A_PARTS.slice(0, n).join('').replaceAll(' ', '') + FLAG_LINE_A_PARTS.slice(n).join('');
+                        return;
+                    }
+                }
+                if (stage === 2) {
+                    n += 2;
+                    if (n > terminalLines - 2) {
+                        stage++;
+                        n = 0;
+                    } else {
+                        terminalTextEl.textContent = [FLAG_LINE_A2, ...Array(n).fill(null).map(() => BORDER_LINE)].join('\n');
+                        return;
+                    }
+                }
+                if (stage === 3) {
+                    n += 2;
+                    if (n > FLAG_LINE_B.length) {
+                        stage++;
+                        n = 0;
+                    } else {
+                        terminalTextEl.textContent = [FLAG_LINE_A2, ...Array(terminalLines - 2).fill(null).map(() => BORDER_LINE), FLAG_LINE_B.slice(0, n)].join('\n');
+                        return;
+                    }
+                }
+                terminalTextEl.textContent = [FLAG_LINE_A2, ...Array(terminalLines - 2).fill(null).map(() => BORDER_LINE), FLAG_LINE_B].join('\n');
+                if (stage === 4) {
+                    stage++;
+                    n = 0;
+                    tipsEl.style.display = '';
+                    return;
+                }
+                if (stage === 5) {
+                    stage++;
+                    n = 0;
+                    clearInterval(timerId);
+                    return;
+                }
+            }
+
+            timerId = setInterval(() => {
+                calcFrame();
+            }, 33);
+
+            // endregion
+
+            // region 自动适应窗口大小
+            const onresize = () => {
+                fontWidth = terminalEl.clientWidth / (BORDER_LINE.length + 1);
+                fontHeight = fontWidth / measureFontWidthRatio(terminalEl);
+                terminalLines = Math.floor(terminalEl.clientHeight / fontHeight);
+                terminalEl.style.fontSize = fontHeight + 'px';
+                calcFrame();
+            };
+            window.addEventListener('resize', onresize);
+            onresize();
+            // endregion
+        };
+
+        touchToStartEl.addEventListener('click', () => {
+            touchToStartEl.style.display = 'none';
+            start();
+            audioEl.play();
+        });
+        audioEl.volume = 0.5;
+        audioEl.play().then(() => {
+            touchToStartEl.style.display = 'none';
+            start();
+        }).catch((e) => {
+            console.log(e);
+            if (e.name === "NotAllowedError") {
+                console.log('请点击屏幕开始...');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+[package]
+name = "fft_mask"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.68"
+fft2d = "0.1.0"
+image = "0.24.5"
+num-complex = "0.4.3"
